@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TDS Data Analyst Agent</title>
+  <style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height:1.65; color:#34395e;
+    background: linear-gradient(120deg,#fafcff 0%,#e5eaf6 100%);
+    min-height:100vh;
+  }
+  .container {
+    max-width:800px; margin:36px auto; padding:32px 24px 24px 24px;
+    background:#fff; border-radius:30px;
+    box-shadow:0 8px 32px rgba(42,61,120,0.10),0 2px 8px rgba(42,45,61,0.09);
+  }
+  .header {
+    text-align:center; margin-bottom:36px;
+  }
+  .header h1 {
+    font-size:2.6rem; margin-bottom:8px;
+    color:#5067c6;
+    font-weight:700;
+    letter-spacing:-2px;
+  }
+  .header p {
+    font-size:1.13rem; color:#4d485b;
+    opacity:.9;
+    margin-top:0; margin-bottom:0;
+  }
+  .main-card {
+    background:linear-gradient(110deg,#f3f6fc 60%,#dedfe9 100%);
+    border-radius:18px; box-shadow:0 4px 16px rgba(64,92,153,0.07);
+    padding:38px 28px 28px 28px; margin-bottom:0px;
+  }
+  .form-group {
+    margin-bottom:30px;
+  }
+  .form-group label {
+    display:block; margin-bottom:8px; font-weight:600; color:#5067c6; font-size:1.08rem;
+  }
+  .required-star {
+    color:#e13c3c; font-size:16px; vertical-align:top;
+  }
+  .file-input-wrapper {
+    margin-top:2px;
+  }
+  .file-input {
+    position:relative;
+    width:100%; padding:24px; border:2px dashed #c6c9df; border-radius:12px;
+    background:#f7f8fa; cursor:pointer; transition:.3s; text-align:center;
+    color:#7b8bbe; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:1rem;
+  }
+  .file-input input[type=file] {
+    opacity:0; position:absolute; width:100%; height:100%; left:0; top:0; cursor:pointer;
+  }
+  .file-input:hover, .file-input:focus {
+    border-color:#7792f7; color:#5067c6; background:#ecf1fa;
+  }
+  .file-input span {
+    z-index:2;
+    pointer-events:none;
+  }
+  .file-info {
+    margin-top:12px; padding:9px 15px;
+    background:#eee2f7; border-radius:7px;
+    font-size:15px; color:#7736a4; display:none;
+    border:1px solid #e1d9ed;
+    font-weight:500;
+  }
+  .btn {
+    background: linear-gradient(90deg,#686be0 0%,#5067c6 80%);
+    color:#fff; border:none;
+    padding:18px 34px;
+    border-radius:10px;
+    font-size:18px; font-weight:700; cursor:pointer;
+    box-shadow:0 2px 8px rgba(120,103,240,0.10);
+    transition:.2s;
+    width:100%;
+    letter-spacing:.2px;
+  }
+  .btn:hover {
+    background: linear-gradient(90deg,#7c94f4 0%,#5067c6 100%);
+    box-shadow:0 4px 24px rgba(120,103,240,0.15);
+    transform:translateY(-2px) scale(1.03);
+  }
+  .btn:disabled {
+    background:#c7c9ed; color:#bbb; cursor:not-allowed; box-shadow:none; transform:none;
+  }
+  .btn-secondary {
+    background:linear-gradient(90deg,#f5f5fa 0%,#d9dbee 100%);
+    color:#665f85; font-weight:600;
+    border:none;
+    margin-left:4px;
+  }
+  .btn-secondary:hover {
+    background:#eee2f7; color:#5067c6;
+    box-shadow:0 1px 5px rgba(90,96,190,0.09);
+    transform:translateY(-1px) scale(1.01);
+  }
+  .button-group {
+    display:flex; gap:9px; margin-top:30px; flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  .loading {
+    display:none; text-align:center; padding:24px 16px 16px 16px;
+    background:#fff8eb;
+    border-radius:15px;
+    box-shadow:0 1px 6px rgba(255,204,107,0.06);
+    margin-top:26px;
+  }
+  .spinner {
+    border:5px solid #ffe3ac; border-top:5px solid #ffc54d;
+    border-radius:50%;
+    width:44px; height:44px; animation:spin 0.9s linear infinite; margin:0 auto 16px;
+  }
+  @keyframes spin {
+    0%{transform:rotate(0)}
+    100%{transform:rotate(360deg)}
+  }
+  .results {
+    display:none; margin-top:34px;
+    background:#f3f6fc; border-radius:15px;
+    padding:24px; 
+    box-shadow:0 2px 8px rgba(42, 58, 101,0.04);
+  }
+  .results h3 {
+    color:#5067c6; font-weight:700;
+    margin-bottom:24px; font-size:1.34rem;
+    letter-spacing:-1px;
+  }
+  .result-item {
+    background:#fff;
+    border-left:5px solid #7792f7;
+    padding:18px 20px;
+    margin-bottom:26px;
+    border-radius:0 11px 11px 0;
+    box-shadow:0 1px 5px rgba(120,103,240,0.07);
+    transition:.14s;
+  }
+  .result-item:last-child {
+    margin-bottom:0;
+  }
+  .question {
+    font-weight:700; color:#734aef;
+    margin-bottom:15px; font-size:1.17rem;
+    font-family:'Inter', 'Segoe UI', sans-serif;
+    letter-spacing:.1px;
+  }
+  .answer {
+    color:#505580; background:inherit;
+    line-height:1.62; font-size:1.07rem;
+  }
+  .answer pre {
+    background:#f6edff;
+    color:#7b54b4;
+    border-radius:7px;
+    padding:13px; font-size:15px;
+    margin:10px 0;
+    overflow:auto;
+    border:1px solid #e1d9ed;
+  }
+  .answer img {
+    max-width:96%; height:auto; border-radius:12px;
+    margin:10px 0 10px 0;
+    box-shadow:0 2px 8px rgba(120,103,240,0.14);
+    cursor:pointer; transition:transform .25s;
+    background:#e9e9fa;
+    border:2px solid #e1d9ed;
+  }
+  .answer img:hover {
+    transform:scale(1.04);
+    box-shadow:0 6px 20px rgba(120,103,240,0.21);
+  }
+  .error {
+    background:#fff2f0; border-left-color:#e13c3c; color:#e13c3c;
+    font-weight:600;
+  }
+  .modal {
+    display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%;
+    background:rgba(52,57,94,0.92); backdrop-filter:blur(2px);
+  }
+  .modal-content {
+    margin:auto; display:block; width:85%; max-width:700px; max-height:78%;
+    object-fit:contain; border-radius:15px;
+    box-shadow:0 8px 28px rgba(52,44,163,0.18);
+    border:3px solid #fff;
+  }
+  .close {
+    position:absolute; top:35px; right:42px; color:#fff;
+    font-size:46px; font-weight:bold; cursor:pointer; transition:color .2s;
+    z-index:9001;
+  }
+  .close:hover { color:#ffe3ac; }
+  @media (max-width:1024px) {
+    .container{max-width:96vw;padding:18px}
+    .main-card{padding:18px}
+  }
+  @media (max-width:768px){
+    .container{padding:4px;border-radius:10px;}
+    .header h1{font-size:1.9rem;}
+    .main-card{padding:12px;border-radius:12px;}
+    .form-group label{font-size:1rem;}
+    .results{padding:11px;font-size:1rem;}
+    .button-group{flex-direction:column;gap:10px;}
+    .btn,.btn-secondary{width:100%;margin:0;}
+    .modal-content{width:98vw;}
+    .close{right:14px;top:14px;}
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 Data Analyst Agent</h1>
+      <p>Upload your questions file and optional dataset to get intelligent answers with visualizations</p>
+    </div>
+    <div class="main-card">
+      <form id="analysisForm">
+        <!-- Questions file (REQUIRED) -->
+        <div class="form-group">
+          <label for="questions_file">Questions File (.txt) <span class="required-star">*</span></label>
+          <div class="file-input-wrapper">
+            <div class="file-input" id="questionsDrop">
+              <input type="file" id="questions_file" name="questions_file" accept=".txt"/>
+              <span>📁 Click to upload your questions (.txt)</span>
+            </div>
+          </div>
+          <div id="questionsInfo" class="file-info"></div>
+        </div>
+        <!-- Dataset file (OPTIONAL) -->
+        <div class="form-group">
+          <label for="data_file">Upload Dataset (Optional)</label>
+          <div class="file-input-wrapper">
+            <div class="file-input" id="dataDrop">
+              <input type="file" id="data_file" name="data_file" accept=".csv,.xlsx,.xls,.json,.parquet,.txt"/>
+              <span>📁 Click or drag & drop your dataset</span>
+            </div>
+          </div>
+          <div id="dataInfo" class="file-info"></div>
+        </div>
+        <div class="button-group">
+          <button type="submit" class="btn" id="submitBtn">🚀 Analyze Data</button>
+          <button type="button" class="btn btn-secondary" id="clearBtn">🗑️ Clear</button>
+        </div>
+      </form>
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Analyzing your data... This may take a few moments.</p>
+      </div>
+      <div class="results" id="results">
+        <h3>📊 Analysis Results</h3>
+        <div id="resultsContent"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Image Modal -->
+  <div id="imageModal" class="modal">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="modalImage" alt="Visualization"/>
+  </div>
+  <script>
+    function normalizeImageData(answer) {
+      let s = null;
+      if (typeof answer === 'string') { s = answer.trim(); }
+      else if (answer && typeof answer === 'object') {
+        s = answer.image || answer.base64 || answer.plot || answer.data || null;
+        if (typeof s === 'string') s = s.trim();
+      }
+      if (!s) return null;
+      s = s.replace(/^data:aimage\//i, 'data:image/');
+      if (/^data:image\//i.test(s)) return s;
+      const base64Like = /^[A-Za-z0-9+/=\r\n]+$/.test(s) && s.length > 200 && !/\s{2,}/.test(s);
+      if (base64Like) return 'data:image/png;base64,' + s;
+      return null;
+    }
+    function renderAnswerInto(answer, container, onImageClick) {
+      const maybeImg = normalizeImageData(answer);
+      if (maybeImg) {
+        const img = document.createElement('img');
+        img.src = maybeImg;
+        img.alt = 'Generated visualization';
+        img.addEventListener('click', () => onImageClick(maybeImg));
+        container.appendChild(img);
+        return;
+      }
+      const text = (answer && typeof answer === 'object') ? JSON.stringify(answer, null, 2) : String(answer ?? '');
+      if (text.includes('\n') || text.length > 120) {
+        const pre = document.createElement('pre');
+        pre.style.whiteSpace = 'pre-wrap';
+        pre.textContent = text;
+        container.appendChild(pre);
+      } else {
+        container.textContent = text;
+      }
+    }
+    class DataAnalystApp {
+      constructor() {
+        this.form = document.getElementById('analysisForm');
+        this.qFileInput = document.getElementById('questions_file');
+        this.dFileInput = document.getElementById('data_file');
+        this.qDrop = document.getElementById('questionsDrop');
+        this.dDrop = document.getElementById('dataDrop');
+        this.qInfo = document.getElementById('questionsInfo');
+        this.dInfo = document.getElementById('dataInfo');
+        this.submitBtn = document.getElementById('submitBtn');
+        this.clearBtn = document.getElementById('clearBtn');
+        this.loading = document.getElementById('loading');
+        this.results = document.getElementById('results');
+        this.resultsContent = document.getElementById('resultsContent');
+        this.modal = document.getElementById('imageModal');
+        this.modalImage = document.getElementById('modalImage');
+        this.closeModal = document.querySelector('.close');
+        this.initEventListeners();
+      }
+      initEventListeners() {
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        this.clearBtn.addEventListener('click', () => this.clearForm());
+        this.qFileInput.addEventListener('change', (e) => this.handleFileSelect(e, 'q'));
+        this.dFileInput.addEventListener('change', (e) => this.handleFileSelect(e, 'd'));
+        this.closeModal.addEventListener('click', () => this.hideImageModal());
+        this.modal.addEventListener('click', (e) => { if (e.target === this.modal) this.hideImageModal(); });
+        this.setupDrop(this.dDrop, (files) => { if (files && files.length > 0) { this.dFileInput.files = files; this.handleFileSelect({ target: { files } }, 'd'); } });
+        this.setupDrop(this.qDrop, (files) => { if (files && files.length > 0) { this.qFileInput.files = files; this.handleFileSelect({ target: { files } }, 'q'); } });
+      }
+      setupDrop(zone, onDropFiles) {
+        zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.style.borderColor = '#7792f7'; });
+        zone.addEventListener('dragleave', (e) => { e.preventDefault(); zone.style.borderColor = '#c6c9df'; });
+        zone.addEventListener('drop', (e) => { e.preventDefault(); zone.style.borderColor = '#c6c9df'; onDropFiles(e.dataTransfer.files); });
+      }
+      handleFileSelect(event, type) {
+        const file = event.target.files[0];
+        if (type === 'q') {
+          if (file) { this.qInfo.innerHTML = `<strong>Questions:</strong> ${file.name} (${(file.size / 1024).toFixed(2)} KB)`; this.qInfo.style.display = 'block'; }
+          else { this.qInfo.style.display = 'none'; }
+        } else {
+          if (file) { this.dInfo.innerHTML = `<strong>Dataset:</strong> ${file.name} (${(file.size / 1024).toFixed(2)} KB)`; this.dInfo.style.display = 'block'; }
+          else { this.dInfo.style.display = 'none'; }
+        }
+      }
+      async handleSubmit(event) {
+        event.preventDefault();
+        if (!this.qFileInput.files[0]) { alert('Please upload your questions .txt file.'); return; }
+        this.showLoading(); this.hideResults();
+        try {
+          const formData = new FormData();
+          formData.append('questions_file', this.qFileInput.files[0]);
+          if (this.dFileInput.files[0]) formData.append('data_file', this.dFileInput.files[0]);
+          const response = await fetch('/api', { method:'POST', body:formData });
+          if (!response.ok) {
+            let msg = `HTTP ${response.status}`;
+            try { const err = await response.json(); if (err && err.detail) msg = err.detail; } catch {}
+            throw new Error(msg);
+          }
+          const data = await response.json();
+          this.displayResults(data);
+        } catch (err) {
+          console.error('Analysis failed:', err);
+          this.displayError(err.message || 'Unknown error');
+        } finally {
+          this.hideLoading();
+        }
+      }
+      displayResults(data) {
+        this.resultsContent.innerHTML = '';
+        if (data.error) { this.displayError(data.error); return; }
+        Object.entries(data).forEach(([question, answer]) => {
+          const item = document.createElement('div');
+          item.className = 'result-item';
+          const qDiv = document.createElement('div');
+          qDiv.className = 'question';
+          qDiv.textContent = question;
+          const aDiv = document.createElement('div');
+          aDiv.className = 'answer';
+          renderAnswerInto(answer, aDiv, (src) => this.showImageModal(src));
+          item.appendChild(qDiv); item.appendChild(aDiv);
+          this.resultsContent.appendChild(item);
+        });
+        this.showResults(); this.scrollToResults();
+      }
+      displayError(message) {
+        this.resultsContent.innerHTML = '';
+        const item = document.createElement('div');
+        item.className = 'result-item error';
+        const title = document.createElement('div');
+        title.className = 'question';
+        title.textContent = '❌ Error';
+        const content = document.createElement('div');
+        content.className = 'answer';
+        content.textContent = message;
+        item.appendChild(title); item.appendChild(content);
+        this.resultsContent.appendChild(item);
+        this.showResults(); this.scrollToResults();
+      }
+      showImageModal(src) { this.modalImage.src = src; this.modal.style.display = 'block'; document.body.style.overflow = 'hidden'; }
+      hideImageModal() { this.modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
+      showLoading() { this.loading.style.display = 'block'; this.submitBtn.disabled = true; this.submitBtn.textContent = '⏳ Analyzing...'; }
+      hideLoading() { this.loading.style.display = 'none'; this.submitBtn.disabled = false; this.submitBtn.textContent = '🚀 Analyze Data'; }
+      showResults() { this.results.style.display = 'block'; }
+      hideResults() { this.results.style.display = 'none'; }
+      scrollToResults() { setTimeout(() => this.results.scrollIntoView({ behavior:'smooth', block:'start' }), 100); }
+      clearForm() { this.qFileInput.value = ''; this.dFileInput.value = ''; this.qInfo.style.display = 'none'; this.dInfo.style.display = 'none'; this.hideResults(); this.hideLoading(); }
+    }
+    document.addEventListener('DOMContentLoaded', () => { new DataAnalystApp(); });
+  </script>
+</body>
+</html>
