@@ -1,10 +1,10 @@
 # Data Analyst Agent — Your AI-Powered Data Companion  
-> Smarter, faster, and more intuitive analysis of your datasets using **Generative AI + Python.**
+> Smarter, faster, and more intuitive analysis of your datasets using **Generative AI + Python.**  
 
 ---
 
 ## What Is This?  
-Meet **Data Analyst Agent 2.0** — an AI-driven assistant that eliminates tedious data crunching.  
+Meet **Data Analyst Agent 2.0** - an AI-driven assistant that eliminates tedious data crunching.  
 Upload your dataset and queries to instantly get:  
 - Visual reports  
 - AI-generated insights  
@@ -53,15 +53,15 @@ python3 -m uvicorn app:app --reload
 Then open http://localhost:8000/ in your browser.
 
 # How It Works
-Write Your Questions
+**Write Your Questions**
 Example:
 What’s the revenue growth month-over-month?
 Find correlation between Age and Income
 Show most profitable products
-Upload Dataset + Questions File
+**Upload Dataset + Questions File**
 Dataset (optional): CSV, Excel, JSON, Parquet, or TXT
 Questions file (required): Plain text
-Get Results
+**Get Results**
 AI processes the queries
 Generates insights and summaries
 Builds visualizations automatically
