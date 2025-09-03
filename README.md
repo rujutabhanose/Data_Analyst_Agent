@@ -1,10 +1,10 @@
-# Data Analyst Agent — Your AI-Powered Data Companion  
+# Data Analyst Agent - AI-Powered Data Companion  
 > Smarter, faster, and more intuitive analysis of your datasets using **Generative AI + Python.**  
 
 ---
 
 ## What Is This?  
-Meet **Data Analyst Agent 2.0** - an AI-driven assistant that eliminates tedious data crunching.  
+Meet the **Data Analyst Agent** - an AI-driven assistant that eliminates tedious data crunching.  
 Upload your dataset and queries to instantly get:  
 - Visual reports  
 - AI-generated insights  
