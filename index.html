@@ -3,409 +3,780 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TDS Data Analyst Agent</title>
+  <title>Data Analyst Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
+  :root {
+    --bg: #f6f8fb;
+    --surface: #ffffff;
+    --surface-alt: #f0f2f8;
+    --border: #e2e6ef;
+    --border-focus: #6366f1;
+    --text: #1e2330;
+    --text-secondary: #5b6178;
+    --text-muted: #8b90a5;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --accent-light: #eef2ff;
+    --accent-glow: rgba(99,102,241,.15);
+    --success: #10b981;
+    --success-light: #ecfdf5;
+    --error: #ef4444;
+    --error-light: #fef2f2;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
+    --transition: .2s cubic-bezier(.4,0,.2,1);
+  }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height:1.65; color:#34395e;
-    background: linear-gradient(120deg,#fafcff 0%,#e5eaf6 100%);
-    min-height:100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
   }
-  .container {
-    max-width:800px; margin:36px auto; padding:32px 24px 24px 24px;
-    background:#fff; border-radius:30px;
-    box-shadow:0 8px 32px rgba(42,61,120,0.10),0 2px 8px rgba(42,45,61,0.09);
+
+  /* ---- Layout ---- */
+  .app {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
   }
+
+  /* ---- Header ---- */
   .header {
-    text-align:center; margin-bottom:36px;
+    text-align: center;
+    margin-bottom: 40px;
   }
+  .header-icon {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--accent), #818cf8);
+    border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px var(--accent-glow);
+  }
+  .header-icon svg { width: 26px; height: 26px; color: #fff; }
   .header h1 {
-    font-size:2.6rem; margin-bottom:8px;
-    color:#5067c6;
-    font-weight:700;
-    letter-spacing:-2px;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--text);
+    margin-bottom: 6px;
   }
   .header p {
-    font-size:1.13rem; color:#4d485b;
-    opacity:.9;
-    margin-top:0; margin-bottom:0;
+    font-size: .95rem;
+    color: var(--text-muted);
+    max-width: 420px;
+    margin: 0 auto;
   }
-  .main-card {
-    background:linear-gradient(110deg,#f3f6fc 60%,#dedfe9 100%);
-    border-radius:18px; box-shadow:0 4px 16px rgba(64,92,153,0.07);
-    padding:38px 28px 28px 28px; margin-bottom:0px;
+
+  /* ---- Card ---- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow);
   }
-  .form-group {
-    margin-bottom:30px;
+
+  /* ---- Upload zones ---- */
+  .upload-section { margin-bottom: 24px; }
+  .upload-section:last-of-type { margin-bottom: 0; }
+  .upload-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .875rem; font-weight: 600; color: var(--text);
+    margin-bottom: 8px;
   }
-  .form-group label {
-    display:block; margin-bottom:8px; font-weight:600; color:#5067c6; font-size:1.08rem;
+  .upload-label .badge {
+    font-size: .675rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
   }
-  .required-star {
-    color:#e13c3c; font-size:16px; vertical-align:top;
+  .badge-required { background: #fef2f2; color: #dc2626; }
+  .badge-optional { background: var(--surface-alt); color: var(--text-muted); }
+
+  .dropzone {
+    position: relative;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--surface);
   }
-  .file-input-wrapper {
-    margin-top:2px;
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-light);
   }
-  .file-input {
-    position:relative;
-    width:100%; padding:24px; border:2px dashed #c6c9df; border-radius:12px;
-    background:#f7f8fa; cursor:pointer; transition:.3s; text-align:center;
-    color:#7b8bbe; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    font-size:1rem;
+  .dropzone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
   }
-  .file-input input[type=file] {
-    opacity:0; position:absolute; width:100%; height:100%; left:0; top:0; cursor:pointer;
+  .dropzone-icon {
+    width: 40px; height: 40px;
+    background: var(--surface-alt);
+    border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 10px;
+    transition: var(--transition);
   }
-  .file-input:hover, .file-input:focus {
-    border-color:#7792f7; color:#5067c6; background:#ecf1fa;
+  .dropzone:hover .dropzone-icon,
+  .dropzone.drag-over .dropzone-icon {
+    background: var(--accent);
   }
-  .file-input span {
-    z-index:2;
-    pointer-events:none;
+  .dropzone-icon svg { width: 20px; height: 20px; color: var(--text-muted); transition: var(--transition); }
+  .dropzone:hover .dropzone-icon svg,
+  .dropzone.drag-over .dropzone-icon svg { color: #fff; }
+  .dropzone-text {
+    font-size: .875rem; color: var(--text-secondary);
+    pointer-events: none;
   }
-  .file-info {
-    margin-top:12px; padding:9px 15px;
-    background:#eee2f7; border-radius:7px;
-    font-size:15px; color:#7736a4; display:none;
-    border:1px solid #e1d9ed;
-    font-weight:500;
+  .dropzone-text strong { color: var(--accent); }
+  .dropzone-hint {
+    font-size: .75rem; color: var(--text-muted);
+    margin-top: 4px; pointer-events: none;
   }
-  .btn {
-    background: linear-gradient(90deg,#686be0 0%,#5067c6 80%);
-    color:#fff; border:none;
-    padding:18px 34px;
-    border-radius:10px;
-    font-size:18px; font-weight:700; cursor:pointer;
-    box-shadow:0 2px 8px rgba(120,103,240,0.10);
-    transition:.2s;
-    width:100%;
-    letter-spacing:.2px;
+
+  /* File selected state */
+  .file-badge {
+    display: none;
+    align-items: center; gap: 8px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: var(--accent-light);
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    font-size: .8rem;
+    color: var(--accent);
+    font-weight: 500;
   }
-  .btn:hover {
-    background: linear-gradient(90deg,#7c94f4 0%,#5067c6 100%);
-    box-shadow:0 4px 24px rgba(120,103,240,0.15);
-    transform:translateY(-2px) scale(1.03);
+  .file-badge.visible { display: flex; }
+  .file-badge svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .file-badge .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-badge .file-size { color: var(--text-muted); font-size: .75rem; flex-shrink: 0; }
+  .file-badge .file-remove {
+    cursor: pointer; padding: 2px;
+    border-radius: 4px; transition: var(--transition);
+    flex-shrink: 0; display: flex;
   }
-  .btn:disabled {
-    background:#c7c9ed; color:#bbb; cursor:not-allowed; box-shadow:none; transform:none;
+  .file-badge .file-remove:hover { background: #c7d2fe; }
+  .file-badge .file-remove svg { width: 14px; height: 14px; }
+
+  /* ---- Actions ---- */
+  .actions {
+    display: flex; gap: 10px;
+    margin-top: 28px;
   }
-  .btn-secondary {
-    background:linear-gradient(90deg,#f5f5fa 0%,#d9dbee 100%);
-    color:#665f85; font-weight:600;
-    border:none;
-    margin-left:4px;
+  .btn-primary {
+    flex: 1;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 24px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 1px 3px var(--accent-glow);
   }
-  .btn-secondary:hover {
-    background:#eee2f7; color:#5067c6;
-    box-shadow:0 1px 5px rgba(90,96,190,0.09);
-    transform:translateY(-1px) scale(1.01);
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+    box-shadow: 0 4px 14px var(--accent-glow);
+    transform: translateY(-1px);
   }
-  .button-group {
-    display:flex; gap:9px; margin-top:30px; flex-wrap:wrap;
-    justify-content:flex-end;
+  .btn-primary:active:not(:disabled) { transform: translateY(0); }
+  .btn-primary:disabled {
+    opacity: .55; cursor: not-allowed; transform: none;
   }
-  .loading {
-    display:none; text-align:center; padding:24px 16px 16px 16px;
-    background:#fff8eb;
-    border-radius:15px;
-    box-shadow:0 1px 6px rgba(255,204,107,0.06);
-    margin-top:26px;
+  .btn-primary svg { width: 18px; height: 18px; }
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 12px 18px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: .875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
   }
-  .spinner {
-    border:5px solid #ffe3ac; border-top:5px solid #ffc54d;
-    border-radius:50%;
-    width:44px; height:44px; animation:spin 0.9s linear infinite; margin:0 auto 16px;
+  .btn-ghost:hover { background: var(--surface-alt); color: var(--text); border-color: #ccd0dc; }
+
+  /* ---- Loading ---- */
+  .loading-overlay {
+    display: none;
+    margin-top: 24px;
+    padding: 32px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow);
+    animation: fadeSlideIn .3s ease;
   }
-  @keyframes spin {
-    0%{transform:rotate(0)}
-    100%{transform:rotate(360deg)}
+  .loading-overlay.visible { display: block; }
+  .loader {
+    width: 40px; height: 40px;
+    margin: 0 auto 16px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
   }
-  .results {
-    display:none; margin-top:34px;
-    background:#f3f6fc; border-radius:15px;
-    padding:24px; 
-    box-shadow:0 2px 8px rgba(42, 58, 101,0.04);
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  .results h3 {
-    color:#5067c6; font-weight:700;
-    margin-bottom:24px; font-size:1.34rem;
-    letter-spacing:-1px;
+  .loading-text {
+    font-size: .9rem; font-weight: 500; color: var(--text);
+    margin-bottom: 4px;
   }
-  .result-item {
-    background:#fff;
-    border-left:5px solid #7792f7;
-    padding:18px 20px;
-    margin-bottom:26px;
-    border-radius:0 11px 11px 0;
-    box-shadow:0 1px 5px rgba(120,103,240,0.07);
-    transition:.14s;
+  .loading-hint {
+    font-size: .8rem; color: var(--text-muted);
+    transition: opacity .3s;
   }
-  .result-item:last-child {
-    margin-bottom:0;
+  .loading-steps {
+    display: flex; justify-content: center; gap: 24px;
+    margin-top: 20px;
   }
-  .question {
-    font-weight:700; color:#734aef;
-    margin-bottom:15px; font-size:1.17rem;
-    font-family:'Inter', 'Segoe UI', sans-serif;
-    letter-spacing:.1px;
+  .step {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .75rem; color: var(--text-muted);
+    transition: var(--transition);
   }
-  .answer {
-    color:#505580; background:inherit;
-    line-height:1.62; font-size:1.07rem;
+  .step.active { color: var(--accent); font-weight: 600; }
+  .step.done { color: var(--success); }
+  .step-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: var(--transition);
   }
-  .answer pre {
-    background:#f6edff;
-    color:#7b54b4;
-    border-radius:7px;
-    padding:13px; font-size:15px;
-    margin:10px 0;
-    overflow:auto;
-    border:1px solid #e1d9ed;
+  .step.active .step-dot { background: var(--accent); animation: pulse 1.5s infinite; }
+  .step.done .step-dot { background: var(--success); }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+    50% { box-shadow: 0 0 0 6px transparent; }
   }
-  .answer img {
-    max-width:96%; height:auto; border-radius:12px;
-    margin:10px 0 10px 0;
-    box-shadow:0 2px 8px rgba(120,103,240,0.14);
-    cursor:pointer; transition:transform .25s;
-    background:#e9e9fa;
-    border:2px solid #e1d9ed;
+
+  /* ---- Results ---- */
+  .results-section {
+    display: none;
+    margin-top: 24px;
+    animation: fadeSlideIn .4s ease;
   }
-  .answer img:hover {
-    transform:scale(1.04);
-    box-shadow:0 6px 20px rgba(120,103,240,0.21);
+  .results-section.visible { display: block; }
+  .results-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
   }
-  .error {
-    background:#fff2f0; border-left-color:#e13c3c; color:#e13c3c;
-    font-weight:600;
+  .results-header h2 {
+    font-size: 1.1rem; font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
   }
+  .results-header h2 svg { width: 20px; height: 20px; color: var(--success); }
+  .results-count {
+    font-size: .8rem; color: var(--text-muted);
+    background: var(--surface-alt);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+  }
+  .result-card:hover { box-shadow: var(--shadow-md); }
+  .result-card:last-child { margin-bottom: 0; }
+  .result-question {
+    padding: 14px 18px;
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--border);
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--text);
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .result-question .q-icon {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .result-answer {
+    padding: 16px 18px;
+    font-size: .9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .result-answer pre {
+    background: #1e2330;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: .8rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin: 8px 0;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  }
+  .result-answer img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    margin: 8px 0;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 1px solid var(--border);
+  }
+  .result-answer img:hover {
+    box-shadow: var(--shadow-lg);
+    transform: scale(1.01);
+  }
+  .result-card.error-card {
+    border-color: #fecaca;
+  }
+  .result-card.error-card .result-question {
+    background: var(--error-light);
+    color: var(--error);
+    border-bottom-color: #fecaca;
+  }
+  .result-card.error-card .result-question .q-icon {
+    background: var(--error);
+  }
+  .result-card.error-card .result-answer {
+    color: #991b1b;
+    font-size: .85rem;
+  }
+
+  /* Copy button */
+  .copy-btn {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 4px;
+    padding: 3px 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: .7rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+  .copy-btn:hover { background: var(--surface); color: var(--text); border-color: #ccd0dc; }
+  .copy-btn svg { width: 12px; height: 12px; }
+
+  /* ---- Image Modal ---- */
   .modal {
-    display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%;
-    background:rgba(52,57,94,0.92); backdrop-filter:blur(2px);
+    display: none;
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    align-items: center; justify-content: center;
+    padding: 40px;
+    animation: fadeIn .2s ease;
   }
-  .modal-content {
-    margin:auto; display:block; width:85%; max-width:700px; max-height:78%;
-    object-fit:contain; border-radius:15px;
-    box-shadow:0 8px 28px rgba(52,44,163,0.18);
-    border:3px solid #fff;
+  .modal.visible { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal img {
+    max-width: 100%; max-height: 85vh;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    object-fit: contain;
   }
-  .close {
-    position:absolute; top:35px; right:42px; color:#fff;
-    font-size:46px; font-weight:bold; cursor:pointer; transition:color .2s;
-    z-index:9001;
+  .modal-close {
+    position: fixed; top: 20px; right: 24px;
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    transition: var(--transition);
   }
-  .close:hover { color:#ffe3ac; }
-  @media (max-width:1024px) {
-    .container{max-width:96vw;padding:18px}
-    .main-card{padding:18px}
+  .modal-close:hover { background: rgba(255,255,255,.2); }
+  .modal-close svg { width: 20px; height: 20px; }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 640px) {
+    .app { padding: 24px 14px 60px; }
+    .header { margin-bottom: 28px; }
+    .header h1 { font-size: 1.4rem; }
+    .card { padding: 20px 16px; }
+    .dropzone { padding: 22px 16px; }
+    .actions { flex-direction: column; }
+    .btn-ghost { width: 100%; }
+    .loading-steps { flex-direction: column; align-items: center; gap: 10px; }
+    .modal { padding: 20px; }
   }
-  @media (max-width:768px){
-    .container{padding:4px;border-radius:10px;}
-    .header h1{font-size:1.9rem;}
-    .main-card{padding:12px;border-radius:12px;}
-    .form-group label{font-size:1rem;}
-    .results{padding:11px;font-size:1rem;}
-    .button-group{flex-direction:column;gap:10px;}
-    .btn,.btn-secondary{width:100%;margin:0;}
-    .modal-content{width:98vw;}
-    .close{right:14px;top:14px;}
-  }
-</style>
+  </style>
 </head>
 <body>
-  <div class="container">
+  <div class="app">
     <div class="header">
-      <h1>📊 Data Analyst Agent</h1>
-      <p>Upload your questions file and optional dataset to get intelligent answers with visualizations</p>
+      <div class="header-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+      </div>
+      <h1>Data Analyst Agent</h1>
+      <p>Upload your questions and an optional dataset for AI-powered analysis</p>
     </div>
-    <div class="main-card">
+
+    <div class="card">
       <form id="analysisForm">
-        <!-- Questions file (REQUIRED) -->
-        <div class="form-group">
-          <label for="questions_file">Questions File (.txt) <span class="required-star">*</span></label>
-          <div class="file-input-wrapper">
-            <div class="file-input" id="questionsDrop">
-              <input type="file" id="questions_file" name="questions_file" accept=".txt"/>
-              <span>📁 Click to upload your questions (.txt)</span>
-            </div>
+        <!-- Questions file -->
+        <div class="upload-section">
+          <div class="upload-label">
+            Questions File
+            <span class="badge badge-required">Required</span>
           </div>
-          <div id="questionsInfo" class="file-info"></div>
-        </div>
-        <!-- Dataset file (OPTIONAL) -->
-        <div class="form-group">
-          <label for="data_file">Upload Dataset (Optional)</label>
-          <div class="file-input-wrapper">
-            <div class="file-input" id="dataDrop">
-              <input type="file" id="data_file" name="data_file" accept=".csv,.xlsx,.xls,.json,.parquet,.txt"/>
-              <span>📁 Click or drag & drop your dataset</span>
+          <div class="dropzone" id="questionsDrop">
+            <input type="file" id="questions_file" name="questions_file" accept=".txt"/>
+            <div class="dropzone-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
             </div>
+            <div class="dropzone-text"><strong>Click to upload</strong> or drag and drop</div>
+            <div class="dropzone-hint">.txt file with your questions</div>
           </div>
-          <div id="dataInfo" class="file-info"></div>
+          <div class="file-badge" id="questionsInfo">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+            <span class="file-name"></span>
+            <span class="file-size"></span>
+            <span class="file-remove" title="Remove file">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            </span>
+          </div>
         </div>
-        <div class="button-group">
-          <button type="submit" class="btn" id="submitBtn">🚀 Analyze Data</button>
-          <button type="button" class="btn btn-secondary" id="clearBtn">🗑️ Clear</button>
+
+        <!-- Dataset file -->
+        <div class="upload-section">
+          <div class="upload-label">
+            Dataset
+            <span class="badge badge-optional">Optional</span>
+          </div>
+          <div class="dropzone" id="dataDrop">
+            <input type="file" id="data_file" name="data_file" accept=".csv,.xlsx,.xls,.json,.parquet,.txt"/>
+            <div class="dropzone-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M10.875 12c-.621 0-1.125.504-1.125 1.125M12 12c.621 0 1.125.504 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 0v1.5c0 .621-.504 1.125-1.125 1.125m0 0c-.621 0-1.125.504-1.125 1.125v1.5"/></svg>
+            </div>
+            <div class="dropzone-text"><strong>Click to upload</strong> or drag and drop</div>
+            <div class="dropzone-hint">CSV, Excel, JSON, or Parquet</div>
+          </div>
+          <div class="file-badge" id="dataInfo">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375"/></svg>
+            <span class="file-name"></span>
+            <span class="file-size"></span>
+            <span class="file-remove" title="Remove file">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary" id="submitBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+            Analyze
+          </button>
+          <button type="button" class="btn-ghost" id="clearBtn">Clear</button>
         </div>
       </form>
-      <div class="loading" id="loading">
-        <div class="spinner"></div>
-        <p>Analyzing your data... This may take a few moments.</p>
-      </div>
-      <div class="results" id="results">
-        <h3>📊 Analysis Results</h3>
-        <div id="resultsContent"></div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-overlay" id="loading">
+      <div class="loader"></div>
+      <div class="loading-text">Analyzing your data...</div>
+      <div class="loading-hint" id="loadingHint">This may take a moment</div>
+      <div class="loading-steps">
+        <div class="step active" id="step1"><span class="step-dot"></span> Reading files</div>
+        <div class="step" id="step2"><span class="step-dot"></span> Running agent</div>
+        <div class="step" id="step3"><span class="step-dot"></span> Generating results</div>
       </div>
     </div>
+
+    <!-- Results -->
+    <div class="results-section" id="results">
+      <div class="results-header">
+        <h2>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          Results
+        </h2>
+        <span class="results-count" id="resultsCount"></span>
+      </div>
+      <div id="resultsContent"></div>
+    </div>
   </div>
+
   <!-- Image Modal -->
-  <div id="imageModal" class="modal">
-    <span class="close">&times;</span>
-    <img class="modal-content" id="modalImage" alt="Visualization"/>
+  <div class="modal" id="imageModal">
+    <button class="modal-close" id="modalClose">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+    </button>
+    <img id="modalImage" alt="Visualization"/>
   </div>
+
   <script>
-    function normalizeImageData(answer) {
-      let s = null;
-      if (typeof answer === 'string') { s = answer.trim(); }
-      else if (answer && typeof answer === 'object') {
-        s = answer.image || answer.base64 || answer.plot || answer.data || null;
-        if (typeof s === 'string') s = s.trim();
-      }
-      if (!s) return null;
-      s = s.replace(/^data:aimage\//i, 'data:image/');
-      if (/^data:image\//i.test(s)) return s;
-      const base64Like = /^[A-Za-z0-9+/=\r\n]+$/.test(s) && s.length > 200 && !/\s{2,}/.test(s);
-      if (base64Like) return 'data:image/png;base64,' + s;
-      return null;
+  function normalizeImageData(answer) {
+    let s = null;
+    if (typeof answer === 'string') s = answer.trim();
+    else if (answer && typeof answer === 'object') {
+      s = answer.image || answer.base64 || answer.plot || answer.data || null;
+      if (typeof s === 'string') s = s.trim();
     }
-    function renderAnswerInto(answer, container, onImageClick) {
-      const maybeImg = normalizeImageData(answer);
-      if (maybeImg) {
-        const img = document.createElement('img');
-        img.src = maybeImg;
-        img.alt = 'Generated visualization';
-        img.addEventListener('click', () => onImageClick(maybeImg));
-        container.appendChild(img);
+    if (!s) return null;
+    s = s.replace(/^data:aimage\//i, 'data:image/');
+    if (/^data:image\//i.test(s)) return s;
+    if (/^[A-Za-z0-9+/=\r\n]+$/.test(s) && s.length > 200 && !/\s{2,}/.test(s))
+      return 'data:image/png;base64,' + s;
+    return null;
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  class DataAnalystApp {
+    constructor() {
+      this.form = document.getElementById('analysisForm');
+      this.qInput = document.getElementById('questions_file');
+      this.dInput = document.getElementById('data_file');
+      this.qDrop = document.getElementById('questionsDrop');
+      this.dDrop = document.getElementById('dataDrop');
+      this.qInfo = document.getElementById('questionsInfo');
+      this.dInfo = document.getElementById('dataInfo');
+      this.submitBtn = document.getElementById('submitBtn');
+      this.clearBtn = document.getElementById('clearBtn');
+      this.loading = document.getElementById('loading');
+      this.loadingHint = document.getElementById('loadingHint');
+      this.results = document.getElementById('results');
+      this.resultsContent = document.getElementById('resultsContent');
+      this.resultsCount = document.getElementById('resultsCount');
+      this.modal = document.getElementById('imageModal');
+      this.modalImage = document.getElementById('modalImage');
+      this.stepEls = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3')];
+      this.stepTimer = null;
+      this.init();
+    }
+
+    init() {
+      this.form.addEventListener('submit', e => this.handleSubmit(e));
+      this.clearBtn.addEventListener('click', () => this.clearForm());
+      this.qInput.addEventListener('change', () => this.showFile(this.qInput, this.qInfo));
+      this.dInput.addEventListener('change', () => this.showFile(this.dInput, this.dInfo));
+      this.setupDrop(this.qDrop, this.qInput, this.qInfo);
+      this.setupDrop(this.dDrop, this.dInput, this.dInfo);
+      this.qInfo.querySelector('.file-remove').addEventListener('click', () => this.removeFile(this.qInput, this.qInfo));
+      this.dInfo.querySelector('.file-remove').addEventListener('click', () => this.removeFile(this.dInput, this.dInfo));
+      document.getElementById('modalClose').addEventListener('click', () => this.hideModal());
+      this.modal.addEventListener('click', e => { if (e.target === this.modal) this.hideModal(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') this.hideModal(); });
+    }
+
+    setupDrop(zone, input, info) {
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+      zone.addEventListener('dragleave', e => { e.preventDefault(); zone.classList.remove('drag-over'); });
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) {
+          input.files = e.dataTransfer.files;
+          this.showFile(input, info);
+        }
+      });
+    }
+
+    showFile(input, info) {
+      const file = input.files[0];
+      if (!file) { info.classList.remove('visible'); return; }
+      info.querySelector('.file-name').textContent = file.name;
+      info.querySelector('.file-size').textContent = formatFileSize(file.size);
+      info.classList.add('visible');
+    }
+
+    removeFile(input, info) {
+      input.value = '';
+      info.classList.remove('visible');
+    }
+
+    async handleSubmit(e) {
+      e.preventDefault();
+      if (!this.qInput.files[0]) {
+        this.qDrop.style.borderColor = 'var(--error)';
+        setTimeout(() => this.qDrop.style.borderColor = '', 2000);
+        return;
+      }
+      this.showLoading();
+      this.results.classList.remove('visible');
+      try {
+        const fd = new FormData();
+        fd.append('questions_file', this.qInput.files[0]);
+        if (this.dInput.files[0]) fd.append('data_file', this.dInput.files[0]);
+        const res = await fetch('/api', { method: 'POST', body: fd });
+        if (!res.ok) {
+          let msg = `HTTP ${res.status}`;
+          try { const err = await res.json(); if (err?.detail) msg = err.detail; } catch {}
+          throw new Error(msg);
+        }
+        this.displayResults(await res.json());
+      } catch (err) {
+        this.displayError(err.message || 'Something went wrong');
+      } finally {
+        this.hideLoading();
+      }
+    }
+
+    displayResults(data) {
+      this.resultsContent.innerHTML = '';
+      if (data.error) { this.displayError(data.error); return; }
+      const entries = Object.entries(data);
+      this.resultsCount.textContent = entries.length + (entries.length === 1 ? ' answer' : ' answers');
+      entries.forEach(([question, answer], i) => {
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        const qDiv = document.createElement('div');
+        qDiv.className = 'result-question';
+        qDiv.innerHTML = `<span class="q-icon">Q${i + 1}</span>`;
+        const qText = document.createElement('span');
+        qText.textContent = question;
+        qDiv.appendChild(qText);
+        // Copy button
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.type = 'button';
+        copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"/></svg> Copy';
+        copyBtn.addEventListener('click', () => {
+          const text = typeof answer === 'object' ? JSON.stringify(answer, null, 2) : String(answer ?? '');
+          navigator.clipboard.writeText(text).then(() => {
+            copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg> Copied';
+            setTimeout(() => {
+              copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"/></svg> Copy';
+            }, 2000);
+          });
+        });
+        qDiv.appendChild(copyBtn);
+        const aDiv = document.createElement('div');
+        aDiv.className = 'result-answer';
+        this.renderAnswer(answer, aDiv);
+        card.appendChild(qDiv);
+        card.appendChild(aDiv);
+        this.resultsContent.appendChild(card);
+      });
+      this.results.classList.add('visible');
+      setTimeout(() => this.results.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+
+    renderAnswer(answer, container) {
+      const img = normalizeImageData(answer);
+      if (img) {
+        const el = document.createElement('img');
+        el.src = img;
+        el.alt = 'Generated visualization';
+        el.addEventListener('click', () => this.showModal(img));
+        container.appendChild(el);
         return;
       }
       const text = (answer && typeof answer === 'object') ? JSON.stringify(answer, null, 2) : String(answer ?? '');
       if (text.includes('\n') || text.length > 120) {
         const pre = document.createElement('pre');
-        pre.style.whiteSpace = 'pre-wrap';
         pre.textContent = text;
         container.appendChild(pre);
       } else {
         container.textContent = text;
       }
     }
-    class DataAnalystApp {
-      constructor() {
-        this.form = document.getElementById('analysisForm');
-        this.qFileInput = document.getElementById('questions_file');
-        this.dFileInput = document.getElementById('data_file');
-        this.qDrop = document.getElementById('questionsDrop');
-        this.dDrop = document.getElementById('dataDrop');
-        this.qInfo = document.getElementById('questionsInfo');
-        this.dInfo = document.getElementById('dataInfo');
-        this.submitBtn = document.getElementById('submitBtn');
-        this.clearBtn = document.getElementById('clearBtn');
-        this.loading = document.getElementById('loading');
-        this.results = document.getElementById('results');
-        this.resultsContent = document.getElementById('resultsContent');
-        this.modal = document.getElementById('imageModal');
-        this.modalImage = document.getElementById('modalImage');
-        this.closeModal = document.querySelector('.close');
-        this.initEventListeners();
-      }
-      initEventListeners() {
-        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-        this.clearBtn.addEventListener('click', () => this.clearForm());
-        this.qFileInput.addEventListener('change', (e) => this.handleFileSelect(e, 'q'));
-        this.dFileInput.addEventListener('change', (e) => this.handleFileSelect(e, 'd'));
-        this.closeModal.addEventListener('click', () => this.hideImageModal());
-        this.modal.addEventListener('click', (e) => { if (e.target === this.modal) this.hideImageModal(); });
-        this.setupDrop(this.dDrop, (files) => { if (files && files.length > 0) { this.dFileInput.files = files; this.handleFileSelect({ target: { files } }, 'd'); } });
-        this.setupDrop(this.qDrop, (files) => { if (files && files.length > 0) { this.qFileInput.files = files; this.handleFileSelect({ target: { files } }, 'q'); } });
-      }
-      setupDrop(zone, onDropFiles) {
-        zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.style.borderColor = '#7792f7'; });
-        zone.addEventListener('dragleave', (e) => { e.preventDefault(); zone.style.borderColor = '#c6c9df'; });
-        zone.addEventListener('drop', (e) => { e.preventDefault(); zone.style.borderColor = '#c6c9df'; onDropFiles(e.dataTransfer.files); });
-      }
-      handleFileSelect(event, type) {
-        const file = event.target.files[0];
-        if (type === 'q') {
-          if (file) { this.qInfo.innerHTML = `<strong>Questions:</strong> ${file.name} (${(file.size / 1024).toFixed(2)} KB)`; this.qInfo.style.display = 'block'; }
-          else { this.qInfo.style.display = 'none'; }
-        } else {
-          if (file) { this.dInfo.innerHTML = `<strong>Dataset:</strong> ${file.name} (${(file.size / 1024).toFixed(2)} KB)`; this.dInfo.style.display = 'block'; }
-          else { this.dInfo.style.display = 'none'; }
-        }
-      }
-      async handleSubmit(event) {
-        event.preventDefault();
-        if (!this.qFileInput.files[0]) { alert('Please upload your questions .txt file.'); return; }
-        this.showLoading(); this.hideResults();
-        try {
-          const formData = new FormData();
-          formData.append('questions_file', this.qFileInput.files[0]);
-          if (this.dFileInput.files[0]) formData.append('data_file', this.dFileInput.files[0]);
-          const response = await fetch('/api', { method:'POST', body:formData });
-          if (!response.ok) {
-            let msg = `HTTP ${response.status}`;
-            try { const err = await response.json(); if (err && err.detail) msg = err.detail; } catch {}
-            throw new Error(msg);
-          }
-          const data = await response.json();
-          this.displayResults(data);
-        } catch (err) {
-          console.error('Analysis failed:', err);
-          this.displayError(err.message || 'Unknown error');
-        } finally {
-          this.hideLoading();
-        }
-      }
-      displayResults(data) {
-        this.resultsContent.innerHTML = '';
-        if (data.error) { this.displayError(data.error); return; }
-        Object.entries(data).forEach(([question, answer]) => {
-          const item = document.createElement('div');
-          item.className = 'result-item';
-          const qDiv = document.createElement('div');
-          qDiv.className = 'question';
-          qDiv.textContent = question;
-          const aDiv = document.createElement('div');
-          aDiv.className = 'answer';
-          renderAnswerInto(answer, aDiv, (src) => this.showImageModal(src));
-          item.appendChild(qDiv); item.appendChild(aDiv);
-          this.resultsContent.appendChild(item);
-        });
-        this.showResults(); this.scrollToResults();
-      }
-      displayError(message) {
-        this.resultsContent.innerHTML = '';
-        const item = document.createElement('div');
-        item.className = 'result-item error';
-        const title = document.createElement('div');
-        title.className = 'question';
-        title.textContent = '❌ Error';
-        const content = document.createElement('div');
-        content.className = 'answer';
-        content.textContent = message;
-        item.appendChild(title); item.appendChild(content);
-        this.resultsContent.appendChild(item);
-        this.showResults(); this.scrollToResults();
-      }
-      showImageModal(src) { this.modalImage.src = src; this.modal.style.display = 'block'; document.body.style.overflow = 'hidden'; }
-      hideImageModal() { this.modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
-      showLoading() { this.loading.style.display = 'block'; this.submitBtn.disabled = true; this.submitBtn.textContent = '⏳ Analyzing...'; }
-      hideLoading() { this.loading.style.display = 'none'; this.submitBtn.disabled = false; this.submitBtn.textContent = '🚀 Analyze Data'; }
-      showResults() { this.results.style.display = 'block'; }
-      hideResults() { this.results.style.display = 'none'; }
-      scrollToResults() { setTimeout(() => this.results.scrollIntoView({ behavior:'smooth', block:'start' }), 100); }
-      clearForm() { this.qFileInput.value = ''; this.dFileInput.value = ''; this.qInfo.style.display = 'none'; this.dInfo.style.display = 'none'; this.hideResults(); this.hideLoading(); }
+
+    displayError(message) {
+      this.resultsContent.innerHTML = '';
+      this.resultsCount.textContent = '';
+      const card = document.createElement('div');
+      card.className = 'result-card error-card';
+      card.innerHTML = `
+        <div class="result-question"><span class="q-icon">!</span><span>Error</span></div>
+        <div class="result-answer">${this.escapeHtml(message)}</div>`;
+      this.resultsContent.appendChild(card);
+      this.results.classList.add('visible');
+      setTimeout(() => this.results.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     }
-    document.addEventListener('DOMContentLoaded', () => { new DataAnalystApp(); });
+
+    escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    showLoading() {
+      this.loading.classList.add('visible');
+      this.submitBtn.disabled = true;
+      this.submitBtn.innerHTML = '<div class="loader" style="width:18px;height:18px;border-width:2px;margin:0"></div> Analyzing...';
+      // Animate steps
+      this.stepEls.forEach(el => { el.className = 'step'; });
+      this.stepEls[0].classList.add('active');
+      let step = 0;
+      const hints = ['Reading and parsing your files...', 'AI agent is processing your questions...', 'Generating final results...'];
+      this.loadingHint.textContent = hints[0];
+      this.stepTimer = setInterval(() => {
+        if (step < 2) {
+          this.stepEls[step].classList.remove('active');
+          this.stepEls[step].classList.add('done');
+          step++;
+          this.stepEls[step].classList.add('active');
+          this.loadingHint.textContent = hints[step];
+        }
+      }, 4000);
+    }
+
+    hideLoading() {
+      clearInterval(this.stepTimer);
+      this.loading.classList.remove('visible');
+      this.submitBtn.disabled = false;
+      this.submitBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg> Analyze';
+    }
+
+    showModal(src) { this.modalImage.src = src; this.modal.classList.add('visible'); document.body.style.overflow = 'hidden'; }
+    hideModal() { this.modal.classList.remove('visible'); document.body.style.overflow = ''; }
+
+    clearForm() {
+      this.qInput.value = '';
+      this.dInput.value = '';
+      this.qInfo.classList.remove('visible');
+      this.dInfo.classList.remove('visible');
+      this.results.classList.remove('visible');
+      this.hideLoading();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => new DataAnalystApp());
   </script>
 </body>
 </html>

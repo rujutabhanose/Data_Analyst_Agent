@@ -37,11 +37,11 @@ try:
 except Exception:
     PIL_AVAILABLE = False
 
-# LangChain / LLM imports (keep as you used)
+# LangChain / LLM imports
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.tools import tool
-from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain.agents import create_agent
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -460,9 +460,7 @@ llm = LLMWithFallback(temperature=0)
 # Tools list for agent (LangChain tool decorator returns metadata for the LLM)
 tools = [scrape_url_to_dataframe]  # we only expose scraping as a tool; agent will still produce code
 
-# Prompt: instruct agent to call the tool and output JSON only
-prompt = ChatPromptTemplate.from_messages([
-    ("system", """You are a full-stack autonomous data analyst agent.
+SYSTEM_PROMPT = """You are a full-stack autonomous data analyst agent.
 
 You will receive:
 - A set of **rules** for this request (these rules may differ depending on whether a dataset is uploaded or not)
@@ -480,31 +478,41 @@ You must:
    - A helper function `plot_to_base64(max_bytes=100000)` for generating base64-encoded images under 100KB.
 5. When returning plots, always use `plot_to_base64()` to keep image sizes small.
 6. Make sure all variables are defined before use, and the code can run without any undefined references.
-"""),
-    ("human", "{input}"),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),
-])
+"""
 
-agent = create_tool_calling_agent(
-    llm=llm,
-    tools=[scrape_url_to_dataframe],  # let the agent call tools if it wants; we will also pre-process scrapes
-    prompt=prompt
-)
 
-agent_executor = AgentExecutor(
-    agent=agent,
-    tools=[scrape_url_to_dataframe],
-    verbose=True,
-    max_iterations=3,
-    early_stopping_method="generate",
-    handle_parsing_errors=True,
-    return_intermediate_steps=False
-)
+def _build_agent():
+    """Build agent using the first working LLM from the fallback hierarchy."""
+    llm_instance = llm._get_llm_instance()
+    return create_agent(
+        llm_instance,
+        tools=[scrape_url_to_dataframe],
+        system_prompt=SYSTEM_PROMPT,
+    )
+
+
+agent_executor = _build_agent()
 
 
 # -----------------------------
 # Runner: orchestrates agent -> pre-scrape inject -> execute
 # -----------------------------
+def _extract_agent_text(response: Dict) -> str:
+    """Extract the final text output from a create_agent response (LangGraph format)."""
+    # New create_agent returns {"messages": [...]} where last AI message has the answer
+    messages = response.get("messages", [])
+    for msg in reversed(messages):
+        content = None
+        if hasattr(msg, "content"):
+            content = msg.content
+        elif isinstance(msg, dict):
+            content = msg.get("content", "")
+        if content and isinstance(content, str) and content.strip():
+            return content
+    # Fallback to old-style keys
+    return response.get("output") or response.get("final_output") or response.get("text") or ""
+
+
 def run_agent_safely(llm_input: str) -> Dict:
     """
     1. Run the agent_executor.invoke to get LLM output
@@ -513,8 +521,8 @@ def run_agent_safely(llm_input: str) -> Dict:
     4. Execute the code in a temp file and return results mapping questions -> answers
     """
     try:
-        response = agent_executor.invoke({"input": llm_input}, {"timeout": LLM_TIMEOUT_SECONDS})
-        raw_out = response.get("output") or response.get("final_output") or response.get("text") or ""
+        response = agent_executor.invoke({"messages": [{"role": "user", "content": llm_input}]})
+        raw_out = _extract_agent_text(response)
         if not raw_out:
             return {"error": f"Agent returned no output. Full response: {response}"}
 
@@ -709,8 +717,8 @@ def run_agent_safely_unified(llm_input: str, pickle_path: str = None) -> Dict:
         max_retries = 3
         raw_out = ""
         for attempt in range(1, max_retries + 1):
-            response = agent_executor.invoke({"input": llm_input}, {"timeout": LLM_TIMEOUT_SECONDS})
-            raw_out = response.get("output") or response.get("final_output") or response.get("text") or ""
+            response = agent_executor.invoke({"messages": [{"role": "user", "content": llm_input}]})
+            raw_out = _extract_agent_text(response)
             if raw_out:
                 break
         if not raw_out:
