@@ -1,0 +1,66 @@
+This project is an AI-powered data analysis web application that allows users to upload datasets (or scrape web data) and ask natural language questions to generate insights, visualizations, and structured answers without writing code. It's designed for non-technical users but built with robust engineering principles for reliability, scalability, and safety. Below, I'll break down its working in technical terms, covering architecture, data flow, key technologies, challenges, and deployment—structured to help you prepare for an interview.
+
+Overall Architecture
+Type: Web-based microservice application with a client-server model.
+Frontend: A simple static HTML interface (index.html) served by FastAPI. It provides a form for uploading files (dataset and questions) and displays results via AJAX (likely using JavaScript for dynamic updates).
+Backend: Built with FastAPI (a modern, high-performance Python web framework based on ASGI for async support). It handles HTTP requests, file uploads, and response generation.
+AI Layer: Integrates Google's Gemini LLM (via LangChain) for natural language processing and code generation. The LLM acts as an "agent" that interprets user queries and generates executable Python code.
+Data Processing Layer: Uses Pandas and NumPy for data manipulation, Matplotlib and Seaborn for visualizations, and DuckDB for in-memory SQL queries. Supports multiple data formats (CSV, Excel, JSON, Parquet, images).
+Execution Environment: Code is executed in a sandboxed manner using temporary Python files to prevent security risks (e.g., no direct shell access).
+Deployment: Containerized with Docker for portability. Includes Procfile for Heroku deployment and start.sh for custom startup scripts. Supports cloud hosting with environment variables for API keys.
+The app runs on Python 3.x (specified in runtime.txt), with dependencies managed via requirements.txt (e.g., FastAPI, LangChain, Pandas, etc.).
+
+Data Flow and How It Works
+User Input:
+
+User uploads a dataset file (optional: CSV, Excel, JSON, Parquet, or image) and a questions file (required: plain text with natural language queries, e.g., "What’s the revenue growth month-over-month?").
+If no dataset is uploaded, the system can scrape web data dynamically.
+Preprocessing:
+
+The questions file is parsed to extract keys and data types (e.g., via regex for patterns like - key: type).
+If a dataset is uploaded, it's loaded into a Pandas DataFrame, pickled (serialized) for safe injection into the execution environment, and a preview is generated (columns, row count, sample data) to provide context to the LLM.
+LLM Agent Processing:
+
+The system uses LangChain to create an agent with a custom LLM wrapper (LLMWithFallback) that handles Google's Gemini models.
+Prompt Engineering: The LLM receives a structured prompt including:
+Rules (e.g., use the uploaded DataFrame as df, generate JSON output, handle plots via a helper function).
+User questions.
+Dataset preview (for context augmentation, not vector search).
+The LLM generates executable Python code that populates a results dictionary with answers, insights, and base64-encoded images for plots.
+Fallback Mechanism: If the primary LLM/model fails (e.g., due to quota or rate limits), it cycles through a hierarchy of Gemini models (gemini-2.5-pro → gemini-2.5-flash → etc.) and up to 10 API keys for load balancing and fault tolerance. Temperature is set to 0 for deterministic outputs.
+Code Execution:
+
+Safety Measures:
+No external network calls in user code (except via predefined tools).
+Results are validated (e.g., type-casting based on parsed keys, JSON parsing with fallbacks).
+Plots are compressed to <100kB base64 strings to avoid large responses.
+If no dataset was uploaded, the code can call a scrape_url_to_dataframe tool to fetch web data (supports HTML tables, CSV, JSON, etc., using BeautifulSoup and Requests).
+Output Generation:
+
+Results are returned as JSON (e.g., {"revenue_growth": "10%", "plot": "data:image/png;base64,..."}).
+Post-processing applies type casting (e.g., convert strings to floats) and maps keys from the questions file.
+Errors are handled gracefully (e.g., timeouts, parsing failures) with HTTP status codes.
+Response to User:
+
+The frontend displays insights, summaries, and visualizations. For interviews, emphasize that this is not a traditional RAG (Retrieval-Augmented Generation) system—it's direct context injection where the dataset preview is fed into the prompt, and the LLM generates code rather than retrieving from a vector store.
+
+Key Technologies and Frameworks
+Web Framework: FastAPI for RESTful APIs, async handling, and automatic OpenAPI docs.
+AI/ML: LangChain for agent orchestration; Google Generative AI (Gemini) for LLM; Scikit-learn for potential ML tasks.
+Data Handling: Pandas for DataFrames; NumPy for numerical ops; DuckDB for SQL-like queries; Pillow for image processing.
+Visualization: Matplotlib/Seaborn for plots, converted to base64 for web display.
+Web Scraping: Requests + BeautifulSoup for fetching and parsing web data.
+Utilities: Python-dotenv for env vars; Uvicorn for ASGI server; Concurrent.futures for threading (e.g., timeouts).
+Deployment: Docker for containerization; Heroku-compatible with Procfile.
+Challenges and Solutions
+Hallucination Control: LLM outputs are constrained by low temperature, strict JSON schemas, and code execution as a "correctness filter" (invalid code fails). Robust JSON parsing with fallback scanning prevents malformed responses.
+Reliability: Multi-key/model fallback handles API quotas; timeouts prevent hangs; logging tracks failures.
+Security: Sandboxed execution in temp files; no arbitrary code injection; input validation on files.
+Performance: In-memory processing (DuckDB, Pandas) for speed; base64 compression for images; async FastAPI for concurrency.
+Scalability: Stateless design; could be extended with databases (e.g., for large datasets) or Kubernetes for horizontal scaling.
+Edge Cases: Handles missing datasets by enabling web scraping; supports images via PIL; type-casting prevents data mismatches.
+Deployment and Running
+Local Development: python3 -m uvicorn app:app --reload starts the server on port 8000.
+Production: Docker build/run for containerization; Heroku deployment via Procfile (web: uvicorn app:app --host 0.0.0.0 --port $PORT).
+Environment: Requires GEMINI_API_KEY (and optionally 10 keys for fallback); LLM_TIMEOUT_SECONDS=240.
+This project demonstrates expertise in full-stack AI applications, prompt engineering, safe code execution, and data science integration.
